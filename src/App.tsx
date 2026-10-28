@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { sampleComplaints, type Complaint, type ComplaintPriority, type ComplaintStatus } from './data/complaints'
 
 type PageId = 'dashboard' | 'registry' | 'master-cases' | 'institutions' | 'bureaus' | 'transfers' | 'assistant'
 
@@ -73,8 +74,62 @@ function Sidebar({ active, onNavigate, mobileOpen, onClose }: { active: PageId; 
   </>
 }
 
-function Header({ title, onMenu, search, onSearchChange }: { title: string; onMenu: () => void; search: string; onSearchChange: (value: string) => void }) {
-  return <header className="topbar"><div className="topbar-left"><button className="icon-button menu-toggle" aria-label="Open navigation menu" onClick={onMenu}><Icon name="menu" /></button><div className="breadcrumbs"><span>Workspace</span><Icon name="chevron" size={13} /><strong>{title}</strong></div></div><div className="topbar-actions"><label className="search-box"><Icon name="search" size={17} /><input aria-label="Filter demo complaints" placeholder="Filter demo complaints..." value={search} onChange={(event) => onSearchChange(event.target.value)} /><kbd>LOCAL</kbd></label><span className="icon-button notification-button unavailable-control" aria-label="Notifications unavailable in demo" title="Notifications unavailable in demo"><Icon name="bell" /><span /></span><div className="topbar-divider" /><div className="profile-button unavailable-control" aria-label="Profile menu unavailable in demo" title="Profile menu unavailable in demo"><div className="profile-avatar">AM</div><div className="profile-copy"><strong>Alex Morgan</strong><span>Administrator · demo</span></div><Icon name="chevron" size={14} /></div></div></header>
+function Header({ title, onMenu, search, onSearchChange, showSearch }: { title: string; onMenu: () => void; search: string; onSearchChange: (value: string) => void; showSearch: boolean }) {
+  return <header className="topbar"><div className="topbar-left"><button className="icon-button menu-toggle" aria-label="Open navigation menu" onClick={onMenu}><Icon name="menu" /></button><div className="breadcrumbs"><span>Workspace</span><Icon name="chevron" size={13} /><strong>{title}</strong></div></div><div className="topbar-actions">{showSearch && <label className="search-box"><Icon name="search" size={17} /><input aria-label="Filter demo complaints" placeholder="Filter demo complaints..." value={search} onChange={(event) => onSearchChange(event.target.value)} /><kbd>LOCAL</kbd></label>}<span className="icon-button notification-button unavailable-control" aria-label="Notifications unavailable in demo" title="Notifications unavailable in demo"><Icon name="bell" /><span /></span><div className="topbar-divider" /><div className="profile-button unavailable-control" aria-label="Profile menu unavailable in demo" title="Profile menu unavailable in demo"><div className="profile-avatar">AM</div><div className="profile-copy"><strong>Alex Morgan</strong><span>Administrator · demo</span></div><Icon name="chevron" size={14} /></div></div></header>
+}
+
+const statusOptions: ComplaintStatus[] = ['Awaiting review', 'In progress', 'Resolved']
+const priorityOptions: ComplaintPriority[] = ['Urgent', 'High', 'Normal', 'Low']
+const dateLabel = (date: string) => new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${date}T12:00:00`))
+
+function ComplaintDetails({ complaint, onClose }: { complaint: Complaint; onClose: () => void }) {
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose() }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [onClose])
+
+  return <div className="detail-overlay"><button className="detail-backdrop" aria-label="Close complaint details" onClick={onClose} /><aside className="detail-drawer" role="dialog" aria-modal="true" aria-labelledby="detail-title"><header className="detail-header"><div><span className="detail-kicker">SYNTHETIC COMPLAINT</span><div className="detail-reference">{complaint.reference}</div></div><button className="icon-button" aria-label="Close complaint details" onClick={onClose}><Icon name="close" /></button></header><div className="detail-body"><h2 id="detail-title">{complaint.title}</h2><div className="detail-badges"><StatusBadge status={complaint.status} /><PriorityBadge priority={complaint.priority} /></div><section className="detail-section"><h3>Original submission</h3><p className="original-submission">{complaint.originalText}</p><p className="detail-helper">Original sample text shown as stored. It has not been summarized or rewritten.</p></section><section className="detail-section"><h3>Complaint details</h3><dl className="detail-metadata"><div><dt>Institution</dt><dd>{complaint.institution}</dd></div><div><dt>Bureau</dt><dd>{complaint.bureau}</dd></div><div><dt>Date received</dt><dd>{dateLabel(complaint.receivedAt)}</dd></div><div><dt>Reporter</dt><dd>{complaint.reporterType}</dd></div><div><dt>Category</dt><dd>{complaint.category}</dd></div><div><dt>Priority</dt><dd>{complaint.priority}</dd></div></dl></section><section className="detail-section"><h3>Master case</h3>{complaint.masterCase ? <div className="master-association"><Icon name="layers" size={16} /><div><strong>{complaint.masterCase.title}</strong><span>{complaint.masterCase.id} · demo association</span></div></div> : <p className="detail-muted">No master case association in this sample.</p>}</section><section className="detail-section"><h3>Synthetic activity timeline</h3><ol className="activity-list">{complaint.activity.map((entry) => <li key={entry.id}><span className="activity-marker" /><div><p>{entry.description}</p><time dateTime={entry.date}>{new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(entry.date))}</time></div></li>)}</ol></section><section className="ai-placeholder"><div className="ai-placeholder-icon"><Icon name="sparkles" size={17} /></div><div><strong>AI match suggestions</strong><p>Placeholder only. Matching is not available in this demo.</p></div><span className="demo-pill">NOT ACTIVE</span></section></div></aside></div>
+}
+
+function StatusBadge({ status }: { status: ComplaintStatus }) {
+  const tone = status === 'Awaiting review' ? 'review' : status === 'In progress' ? 'progress' : 'resolved'
+  return <span className={`status-badge ${tone}`}><i />{status}</span>
+}
+
+function PriorityBadge({ priority }: { priority: ComplaintPriority }) {
+  return <span className={`priority-badge priority-${priority.toLowerCase()}`}><i />{priority}</span>
+}
+
+function ComplaintRegistry({ search, onSearchChange }: { search: string; onSearchChange: (value: string) => void }) {
+  const [status, setStatus] = useState('')
+  const [priority, setPriority] = useState('')
+  const [bureau, setBureau] = useState('')
+  const [selected, setSelected] = useState<Complaint | null>(null)
+  const bureaus = [...new Set(sampleComplaints.map((complaint) => complaint.bureau))].sort()
+  const normalizedSearch = search.trim().toLowerCase()
+  const filtered = sampleComplaints.filter((complaint) => {
+    const matchesSearch = !normalizedSearch || [complaint.reference, complaint.title, complaint.originalText, complaint.institution, complaint.bureau].some((value) => value.toLowerCase().includes(normalizedSearch))
+    return matchesSearch && (!status || complaint.status === status) && (!priority || complaint.priority === priority) && (!bureau || complaint.bureau === bureau)
+  })
+  const activeFilters = Boolean(search || status || priority || bureau)
+  const resetFilters = () => { onSearchChange(''); setStatus(''); setPriority(''); setBureau('') }
+  const counts = {
+    total: sampleComplaints.length,
+    awaiting: sampleComplaints.filter((complaint) => complaint.status === 'Awaiting review').length,
+    progress: sampleComplaints.filter((complaint) => complaint.status === 'In progress').length,
+    resolved: sampleComplaints.filter((complaint) => complaint.status === 'Resolved').length,
+  }
+
+  return <main className="page-content registry-content"><div className="registry-heading"><div><div className="eyebrow"><span className="eyebrow-dot" /> CASE MANAGEMENT <span className="demo-label">DEMO DATA</span></div><h1>Complaint Registry</h1><p className="welcome-copy">Review and track complaints submitted across your service network.</p></div></div><div className="registry-notice"><span className="notice-icon">i</span><p><strong>Demonstration records only.</strong> All complaints, people, organizations, and activity shown here are synthetic examples for interface preview.</p></div>
+    <section className="registry-summary" aria-label="Complaint counts from local demo dataset"><SummaryCard label="Total complaints" value={counts.total} tone="indigo" /><SummaryCard label="Awaiting review" value={counts.awaiting} tone="amber" /><SummaryCard label="In progress" value={counts.progress} tone="blue" /><SummaryCard label="Resolved" value={counts.resolved} tone="green" /></section>
+    <section className="panel registry-panel"><div className="registry-panel-heading"><div><h2>All complaints</h2><p>{filtered.length} of {sampleComplaints.length} synthetic sample records</p></div><span className="demo-pill">SYNTHETIC DATASET</span></div><div className="registry-filters"><label className="registry-search"><Icon name="search" size={16} /><input value={search} onChange={(event) => onSearchChange(event.target.value)} aria-label="Search complaints by reference, title, original text, institution, or bureau" placeholder="Search reference, complaint, institution, bureau..." /></label><label className="filter-control"><span>Status</span><select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filter by status"><option value="">All statuses</option>{statusOptions.map((option) => <option key={option}>{option}</option>)}</select></label><label className="filter-control"><span>Priority</span><select value={priority} onChange={(event) => setPriority(event.target.value)} aria-label="Filter by priority"><option value="">All priorities</option>{priorityOptions.map((option) => <option key={option}>{option}</option>)}</select></label><label className="filter-control bureau-filter"><span>Bureau</span><select value={bureau} onChange={(event) => setBureau(event.target.value)} aria-label="Filter by bureau"><option value="">All bureaus</option>{bureaus.map((option) => <option key={option}>{option}</option>)}</select></label><button className="clear-filters" onClick={resetFilters} disabled={!activeFilters}><Icon name="close" size={14} />Clear filters</button></div>
+      <div className="registry-table-scroll"><table className="registry-table"><thead><tr><th>REFERENCE ID</th><th>COMPLAINT</th><th>INSTITUTION</th><th>BUREAU</th><th>DATE RECEIVED</th><th>PRIORITY</th><th>STATUS</th><th>MASTER CASE</th></tr></thead><tbody>{filtered.map((complaint) => <tr key={complaint.id} tabIndex={0} aria-label={`Open complaint ${complaint.reference}: ${complaint.title}`} onClick={() => setSelected(complaint)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelected(complaint) } }}><td className="registry-ref">{complaint.reference}</td><td className="registry-title-cell"><strong>{complaint.title}</strong><span>Original submission available in details</span></td><td>{complaint.institution}</td><td>{complaint.bureau}</td><td>{dateLabel(complaint.receivedAt)}</td><td><PriorityBadge priority={complaint.priority} /></td><td><StatusBadge status={complaint.status} /></td><td>{complaint.masterCase ? <span className="master-case-cell"><Icon name="layers" size={13} />{complaint.masterCase.id}</span> : <span className="no-master-case">—</span>}</td></tr>)}</tbody></table>{filtered.length === 0 && <div className="registry-empty"><div className="empty-search-icon"><Icon name="search" size={20} /></div><strong>No complaints match these filters</strong><p>Try a different search term or clear the selected filters to see all synthetic examples.</p><button className="clear-empty" onClick={resetFilters}>Clear all filters</button></div>}</div><div className="registry-table-foot">Showing all matching synthetic examples · No pagination</div>
+    </section>{selected && <ComplaintDetails complaint={selected} onClose={() => setSelected(null)} />}</main>
+}
+
+function SummaryCard({ label, value, tone }: { label: string; value: number; tone: string }) {
+  return <article className="registry-summary-card"><span className={`summary-icon ${tone}`}><Icon name={tone === 'indigo' ? 'file' : tone === 'amber' ? 'clock' : tone === 'blue' ? 'transfer' : 'check'} size={17} /></span><span className="summary-label">{label}</span><strong>{value}</strong><span className="summary-note">from demo sample dataset</span></article>
 }
 
 function KpiCard({ item }: { item: (typeof kpis)[number] }) {
@@ -119,7 +174,7 @@ function App() {
   }, [mobileOpen])
   const currentTitle = activePage === 'dashboard' ? 'Dashboard' : modules[activePage].title
 
-  return <div className="app-shell"><Sidebar active={activePage} onNavigate={(page) => { setActivePage(page); if (page === 'dashboard') setSearch('') }} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} /><div className="main-column"><Header title={currentTitle} onMenu={() => setMobileOpen(true)} search={search} onSearchChange={setSearch} />{activePage === 'dashboard' ? <Dashboard onNavigate={setActivePage} search={search} /> : <ModulePage page={activePage} />}</div></div>
+  return <div className="app-shell"><Sidebar active={activePage} onNavigate={(page) => { setActivePage(page); setSearch('') }} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} /><div className="main-column"><Header title={currentTitle} onMenu={() => setMobileOpen(true)} search={search} onSearchChange={setSearch} showSearch={activePage !== 'registry'} />{activePage === 'dashboard' ? <Dashboard onNavigate={setActivePage} search={search} /> : activePage === 'registry' ? <ComplaintRegistry search={search} onSearchChange={setSearch} /> : <ModulePage page={activePage} />}</div></div>
 }
 
 export default App
