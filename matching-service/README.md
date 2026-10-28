@@ -12,6 +12,24 @@ The set includes English, Hindi, Hinglish/Romanized Hindi, native-script and Rom
 
 These examples are synthetic, manually assigned judgments and rationales, and have not been independently reviewed by domain or native-language experts. The 22 scenario groups—not 88 pairs—are closer to the independent unit count. Subgroups are small, and this evaluation does not establish real-world accuracy.
 
+## Independent language review packet
+
+`data/review_packet.json` is a separate reviewer-facing copy of every complaint pair. It preserves pair IDs and scenario groups, includes the original pair texts and language/script category, and leaves two independent reviewer judgments plus final adjudication fields blank. It omits existing labels, label rationales, development/test assignments, scores, predictions, and model names. No expert or native-language review has yet been represented as completed.
+
+Reviewers should read `REVIEW_INSTRUCTIONS.md`. Review pairs independently before discussing disagreements, use `uncertain` when meaning cannot be judged reliably, and judge the underlying issue rather than shared topic words. Scenario groups are visible to help reviewers recognize related variants and hard negatives; split assignments remain hidden.
+
+To complete a packet, copy it and edit only the review fields:
+
+```sh
+cp matching-service/data/review_packet.json matching-service/data/review_packet_completed.json
+# Fill the reviewer and adjudication fields in review_packet_completed.json.
+matching-service/.venv/bin/python matching-service/merge_reviews.py --input matching-service/data/review_packet_completed.json --output matching-service/data/adjudicated_labels.json
+```
+
+The existing `matching-service/.venv` must be available; this workflow was tested with its Python 3.12.14 interpreter. Do not substitute the system `python3`.
+
+The merge script validates that all review fields are complete and valid, then writes `data/adjudicated_labels.json` as a new file. It refuses to overwrite an existing output; use `--output` to choose another path. The original `data/labels.json`, evaluation results, and blank review packet are not modified. This output is a review record, not a replacement evaluator input; uncertain judgments are preserved rather than coerced to related/unrelated.
+
 ## Thresholds and baselines
 
 Thresholds for Jaccard, IDF, MiniLM, and LaBSE are chosen on development data only. The IDF baseline is fit using development complaint texts only, with `idf(t)=ln((N_dev+1)/(df_dev(t)+1))+1`, and uses cosine similarity on binary IDF-weighted vectors. Sentence embeddings are L2-normalized and compared with cosine similarity. Scores are similarity measures, not duplicate probabilities.
