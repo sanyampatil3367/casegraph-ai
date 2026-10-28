@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { sampleComplaints, type Complaint, type ComplaintPriority, type ComplaintStatus } from './data/complaints'
+import { sampleInstitutions, type Institution, type InstitutionType } from './data/institutions'
+import { sampleBureaus, type Bureau, type BureauCategory } from './data/bureaus'
 
 type PageId = 'dashboard' | 'registry' | 'master-cases' | 'institutions' | 'bureaus' | 'transfers' | 'assistant'
 
-type IconName = 'grid' | 'file' | 'layers' | 'building' | 'landmark' | 'transfer' | 'sparkles' | 'search' | 'bell' | 'menu' | 'close' | 'arrow' | 'clock' | 'check' | 'more' | 'chevron'
+type IconName = 'grid' | 'file' | 'layers' | 'building' | 'landmark' | 'transfer' | 'sparkles' | 'search' | 'bell' | 'menu' | 'close' | 'arrow' | 'clock' | 'check' | 'more' | 'chevron' | 'pin' | 'copy'
 
 const navigation: { id: PageId; label: string; icon: IconName }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
@@ -33,6 +35,8 @@ function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
     check: <><path d="m5 12 4 4L19 6" /></>,
     more: <><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></>,
     chevron: <path d="m9 18 6-6-6-6" />,
+    pin: <><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
+    copy: <><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" /></>,
   }
 
   return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>
@@ -132,6 +136,94 @@ function SummaryCard({ label, value, tone }: { label: string; value: number; ton
   return <article className="registry-summary-card"><span className={`summary-icon ${tone}`}><Icon name={tone === 'indigo' ? 'file' : tone === 'amber' ? 'clock' : tone === 'blue' ? 'transfer' : 'check'} size={17} /></span><span className="summary-label">{label}</span><strong>{value}</strong><span className="summary-note">from demo sample dataset</span></article>
 }
 
+function DirectoryNotice() {
+  return <div className="registry-notice"><span className="notice-icon">i</span><p><strong>Synthetic directory data.</strong> Institutions, bureaus, and complaint counts are fictional examples for interface preview only.</p></div>
+}
+
+function DirectoryFilters({ search, onSearch, searchLabel, searchPlaceholder, filterLabel, filterValue, onFilter, filterOptions, secondFilter, clear, hasFilters }: { search: string; onSearch: (value: string) => void; searchLabel: string; searchPlaceholder: string; filterLabel: string; filterValue: string; onFilter: (value: string) => void; filterOptions: string[]; secondFilter?: { label: string; value: string; onChange: (value: string) => void; options: { id: string; label: string }[] }; clear: () => void; hasFilters: boolean }) {
+  const allLabel = filterLabel === 'Category' ? 'All categories' : `All ${filterLabel.toLowerCase()}s`
+  const secondaryAllLabel = secondFilter?.label === 'Associated bureau' ? 'All associated bureaus' : secondFilter ? `All ${secondFilter.label.toLowerCase()}s` : ''
+  return <div className={`directory-filters${secondFilter ? ' with-secondary' : ''}`}><label className="registry-search"><Icon name="search" size={16} /><input value={search} onChange={(event) => onSearch(event.target.value)} aria-label={searchLabel} placeholder={searchPlaceholder} /></label><label className="filter-control"><span>{filterLabel}</span><select value={filterValue} onChange={(event) => onFilter(event.target.value)} aria-label={`Filter by ${filterLabel.toLowerCase()}`}><option value="">{allLabel}</option>{filterOptions.map((option) => <option key={option}>{option}</option>)}</select></label>{secondFilter && <label className="filter-control"><span>{secondFilter.label}</span><select value={secondFilter.value} onChange={(event) => secondFilter.onChange(event.target.value)} aria-label={`Filter by ${secondFilter.label.toLowerCase()}`}><option value="">{secondaryAllLabel}</option>{secondFilter.options.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select></label>}<button className="clear-filters" onClick={clear} disabled={!hasFilters}><Icon name="close" size={14} />Clear filters</button></div>
+}
+
+function DirectoryEmpty({ title, clear }: { title: string; clear: () => void }) {
+  return <div className="directory-empty"><div className="empty-search-icon"><Icon name="search" size={20} /></div><strong>{title}</strong><p>Try another search or clear your filters to view all synthetic examples.</p><button className="clear-empty" onClick={clear}>Clear all filters</button></div>
+}
+
+function InstitutionDirectory() {
+  const [search, setSearch] = useState('')
+  const [type, setType] = useState('')
+  const [bureauId, setBureauId] = useState('')
+  const [selected, setSelected] = useState<Institution | null>(null)
+  const typeOptions: InstitutionType[] = [...new Set(sampleInstitutions.map((institution) => institution.type))]
+  const bureauOptions = sampleBureaus.filter((bureau) => sampleInstitutions.some((institution) => institution.bureauIds.includes(bureau.id)))
+  const filtered = sampleInstitutions.filter((institution) => {
+    const linkedBureaus = institution.bureauIds.map((id) => sampleBureaus.find((bureau) => bureau.id === id)?.name ?? '').join(' ')
+    const matchesSearch = `${institution.name} ${institution.id} ${institution.location} ${institution.type} ${linkedBureaus}`.toLowerCase().includes(search.trim().toLowerCase())
+    return matchesSearch && (!type || institution.type === type) && (!bureauId || institution.bureauIds.includes(bureauId))
+  })
+  const clear = () => { setSearch(''); setType(''); setBureauId('') }
+  const hasFilters = Boolean(search || type || bureauId)
+  const regions = new Set(sampleInstitutions.map((institution) => institution.location)).size
+  const complaintCount = sampleComplaints.length
+
+  return <main className="page-content directory-content"><div className="registry-heading"><div><div className="eyebrow"><span className="eyebrow-dot" /> ORGANIZATION DIRECTORY <span className="demo-label">DEMO DATA</span></div><h1>Institutions</h1><p className="welcome-copy">Browse the example organizations and bureaus in your service network.</p></div></div><DirectoryNotice /><section className="registry-summary directory-summary" aria-label="Institution directory demo counts"><SummaryCard label="Institutions" value={sampleInstitutions.length} tone="indigo" /><SummaryCard label="Associated bureaus" value={sampleBureaus.length} tone="blue" /><SummaryCard label="Sample complaints" value={complaintCount} tone="amber" /><SummaryCard label="Example regions" value={regions} tone="green" /></section><section className="panel directory-panel"><div className="directory-panel-heading"><div><h2>Institution directory</h2><p>{filtered.length} of {sampleInstitutions.length} synthetic institution records</p></div><span className="demo-pill">SYNTHETIC DIRECTORY</span></div><DirectoryFilters search={search} onSearch={setSearch} searchLabel="Search institutions by name, ID, location, or type" searchPlaceholder="Search name, ID, location, type..." filterLabel="Institution type" filterValue={type} onFilter={setType} filterOptions={typeOptions} secondFilter={{ label: 'Associated bureau', value: bureauId, onChange: setBureauId, options: bureauOptions.map((bureau) => ({ id: bureau.id, label: bureau.name })) }} clear={clear} hasFilters={hasFilters} /><div className="directory-card-grid institution-grid">{filtered.map((institution) => {
+    const linkedBureaus = institution.bureauIds.map((id) => sampleBureaus.find((bureau) => bureau.id === id)).filter((bureau): bureau is Bureau => Boolean(bureau))
+    const complaintCountForInstitution = sampleComplaints.filter((complaint) => complaint.institutionId === institution.id).length
+    return <button key={institution.id} className="directory-card institution-card" onClick={() => setSelected(institution)} aria-label={`View ${institution.name} details`}><div className="directory-card-top"><span className="directory-icon"><Icon name="building" size={19} /></span><span className="institution-type">{institution.type}</span></div><h3>{institution.name}</h3><span className="directory-id">{institution.id}</span><span className="directory-location"><Icon name="pin" size={14} />{institution.location}</span><span className="directory-divider" /><span className="directory-section-label">ASSOCIATED BUREAUS</span><span className="bureau-tags">{linkedBureaus.map((bureau) => <span key={bureau.id} className="bureau-tag">{bureau.name}</span>)}</span><span className="institution-card-foot"><span>{complaintCountForInstitution} synthetic {complaintCountForInstitution === 1 ? 'complaint' : 'complaints'}</span><Icon name="arrow" size={14} /></span></button>
+  })}{filtered.length === 0 && <DirectoryEmpty title="No institutions match your search" clear={clear} />}</div></section>{selected && <InstitutionDetails institution={selected} onClose={() => setSelected(null)} />}</main>
+}
+
+function InstitutionDetails({ institution, onClose }: { institution: Institution; onClose: () => void }) {
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose() }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [onClose])
+  const bureaus = institution.bureauIds.map((id) => sampleBureaus.find((bureau) => bureau.id === id)).filter((bureau): bureau is Bureau => Boolean(bureau))
+  const complaints = sampleComplaints.filter((complaint) => complaint.institutionId === institution.id)
+  return <div className="detail-overlay"><button className="detail-backdrop" aria-label="Close institution details" onClick={onClose} /><aside className="detail-drawer" role="dialog" aria-modal="true" aria-labelledby="institution-detail-title"><header className="detail-header"><div><span className="detail-kicker">SYNTHETIC INSTITUTION</span><div className="detail-reference">{institution.id}</div></div><button className="icon-button" aria-label="Close institution details" onClick={onClose}><Icon name="close" /></button></header><div className="detail-body"><span className="directory-icon detail-directory-icon"><Icon name="building" size={22} /></span><h2 id="institution-detail-title">{institution.name}</h2><span className="institution-type detail-type">{institution.type}</span><p className="institution-description">{institution.description}</p><section className="detail-section"><h3>Institution metadata</h3><dl className="detail-metadata"><div><dt>Institution ID</dt><dd>{institution.id}</dd></div><div><dt>Location</dt><dd>{institution.location}</dd></div><div><dt>Type</dt><dd>{institution.type}</dd></div><div><dt>Sample complaints</dt><dd>{complaints.length}</dd></div></dl></section><section className="detail-section"><h3>Associated bureaus</h3>{bureaus.length ? <div className="related-record-list">{bureaus.map((bureau) => <div className="related-record" key={bureau.id}><span className="related-icon"><Icon name="landmark" size={15} /></span><div><strong>{bureau.name}</strong><span>{bureau.category} · {bureau.id}</span></div></div>)}</div> : <p className="detail-muted">No associated bureaus in this sample.</p>}</section><section className="detail-section"><h3>Associated synthetic complaints</h3>{complaints.length ? <div className="related-record-list">{complaints.map((complaint) => <div className="related-record complaint-related" key={complaint.id}><span className="related-icon"><Icon name="file" size={15} /></span><div><strong>{complaint.reference} · {complaint.title}</strong><span>{complaint.status} · {complaint.priority} priority</span></div></div>)}</div> : <p className="detail-muted">No complaint samples are associated with this institution.</p>}</section><p className="directory-detail-note">This organization is fictional and included only as a synthetic directory example.</p></div></aside></div>
+}
+
+function BureauDirectory() {
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('')
+  const [selected, setSelected] = useState<Bureau | null>(null)
+  const [copyFeedback, setCopyFeedback] = useState('')
+  const categories: BureauCategory[] = [...new Set(sampleBureaus.map((bureau) => bureau.category))]
+  const filtered = sampleBureaus.filter((bureau) => `${bureau.name} ${bureau.id} ${bureau.description}`.toLowerCase().includes(search.trim().toLowerCase()) && (!category || bureau.category === category))
+  const clear = () => { setSearch(''); setCategory('') }
+  const hasFilters = Boolean(search || category)
+  const copyId = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(id)
+      setCopyFeedback('UUID copied to clipboard.')
+    } catch {
+      setCopyFeedback('Could not copy UUID. Select and copy it manually.')
+    }
+  }
+  return <main className="page-content directory-content"><div className="registry-heading"><div><div className="eyebrow"><span className="eyebrow-dot" /> ORGANIZATION DIRECTORY <span className="demo-label">DEMO DATA</span></div><h1>Bureaus</h1><p className="welcome-copy">Explore the example teams and areas of responsibility across institutions.</p></div></div><DirectoryNotice /><section className="registry-summary directory-summary bureau-summary" aria-label="Bureau directory demo counts"><SummaryCard label="Bureaus" value={sampleBureaus.length} tone="indigo" /><SummaryCard label="Associated institutions" value={new Set(sampleBureaus.flatMap((bureau) => bureau.institutionIds)).size} tone="blue" /><SummaryCard label="Open sample complaints" value={sampleComplaints.filter((complaint) => complaint.status !== 'Resolved').length} tone="amber" /><SummaryCard label="Closed sample complaints" value={sampleComplaints.filter((complaint) => complaint.status === 'Resolved').length} tone="green" /></section><section className="panel directory-panel"><div className="directory-panel-heading"><div><h2>Bureau directory</h2><p>{filtered.length} of {sampleBureaus.length} synthetic bureau records</p></div><span className="demo-pill">SYNTHETIC DIRECTORY</span></div><DirectoryFilters search={search} onSearch={setSearch} searchLabel="Search bureaus by name, UUID, or description" searchPlaceholder="Search name, UUID, description..." filterLabel="Category" filterValue={category} onFilter={setCategory} filterOptions={categories} clear={clear} hasFilters={hasFilters} /><div className="bureau-card-grid">{filtered.map((bureau) => {
+    const institutions = bureau.institutionIds.map((id) => sampleInstitutions.find((institution) => institution.id === id)).filter((institution): institution is Institution => Boolean(institution))
+    const relatedComplaints = sampleComplaints.filter((complaint) => complaint.bureauId === bureau.id)
+    const openCount = relatedComplaints.filter((complaint) => complaint.status !== 'Resolved').length
+    const closedCount = relatedComplaints.filter((complaint) => complaint.status === 'Resolved').length
+    return <button key={bureau.id} className="directory-card bureau-card" onClick={() => { setSelected(bureau); setCopyFeedback('') }} aria-label={`View ${bureau.name} details`}><div className="directory-card-top"><span className="directory-icon bureau-directory-icon"><Icon name="landmark" size={19} /></span><span className="institution-type">{bureau.category}</span></div><h3>{bureau.name}</h3><p className="bureau-description">{bureau.description}</p><span className="bureau-card-id">{bureau.id}</span><span className="directory-divider" /><span className="directory-section-label">ASSOCIATED INSTITUTIONS</span><span className="bureau-institutions">{institutions.length ? institutions.map((institution) => institution.name).join(', ') : 'No linked institutions in this sample'}</span><span className="bureau-counts"><span><i className="count-dot open-dot" />{openCount} open</span><span><i className="count-dot closed-dot" />{closedCount} closed</span></span></button>
+  })}{filtered.length === 0 && <DirectoryEmpty title="No bureaus match your search" clear={clear} />}</div><div className="registry-table-foot">All bureau UUIDs are stable synthetic identifiers · Counts are calculated from the local sample complaint dataset</div></section>{selected && <BureauDetails bureau={selected} copyFeedback={copyFeedback} onCopy={() => void copyId(selected.id)} onClose={() => setSelected(null)} />}</main>
+}
+
+function BureauDetails({ bureau, copyFeedback, onCopy, onClose }: { bureau: Bureau; copyFeedback: string; onCopy: () => void; onClose: () => void }) {
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose() }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [onClose])
+  const institutions = bureau.institutionIds.map((id) => sampleInstitutions.find((institution) => institution.id === id)).filter((institution): institution is Institution => Boolean(institution))
+  const complaints = sampleComplaints.filter((complaint) => complaint.bureauId === bureau.id)
+  const openCount = complaints.filter((complaint) => complaint.status !== 'Resolved').length
+  const closedCount = complaints.filter((complaint) => complaint.status === 'Resolved').length
+  return <div className="detail-overlay"><button className="detail-backdrop" aria-label="Close bureau details" onClick={onClose} /><aside className="detail-drawer" role="dialog" aria-modal="true" aria-labelledby="bureau-detail-title"><header className="detail-header"><div><span className="detail-kicker">SYNTHETIC BUREAU</span><div className="detail-reference">Bureau directory entry</div></div><button className="icon-button" aria-label="Close bureau details" onClick={onClose}><Icon name="close" /></button></header><div className="detail-body"><span className="directory-icon bureau-directory-icon detail-directory-icon"><Icon name="landmark" size={22} /></span><h2 id="bureau-detail-title">{bureau.name}</h2><p className="institution-description">{bureau.description}</p><section className="detail-section"><h3>Stable bureau UUID</h3><div className="uuid-copy-row"><code>{bureau.id}</code><button className="copy-uuid" onClick={onCopy} aria-label="Copy bureau UUID"><Icon name="copy" size={15} />Copy UUID</button></div><p className="copy-feedback" aria-live="polite">{copyFeedback || 'UUID remains stable for this synthetic record.'}</p></section><section className="detail-section"><h3>Area of responsibility</h3><span className="bureau-category-tag">{bureau.category}</span></section><section className="detail-section"><h3>Associated institutions</h3>{institutions.length ? <div className="related-record-list">{institutions.map((institution) => <div className="related-record" key={institution.id}><span className="related-icon"><Icon name="building" size={15} /></span><div><strong>{institution.name}</strong><span>{institution.id} · {institution.location}</span></div></div>)}</div> : <p className="detail-muted">No associated institutions in this sample.</p>}</section><section className="detail-section"><h3>Sample complaint activity</h3><div className="bureau-counts detail-counts"><span><i className="count-dot open-dot" />{openCount} open</span><span><i className="count-dot closed-dot" />{closedCount} closed</span><span>{complaints.length} total examples</span></div>{complaints.length ? <div className="related-record-list complaint-list">{complaints.map((complaint) => <div className="related-record complaint-related" key={complaint.id}><span className="related-icon"><Icon name="file" size={15} /></span><div><strong>{complaint.reference} · {complaint.title}</strong><span>{complaint.institution} · {complaint.status}</span></div></div>)}</div> : <p className="detail-muted">No complaint samples are associated with this bureau.</p>}</section><p className="directory-detail-note">This bureau is a fictional example. Counts are derived from local synthetic complaint data.</p></div></aside></div>
+}
+
 function KpiCard({ item }: { item: (typeof kpis)[number] }) {
   return <article className="kpi-card"><div className={`kpi-icon ${item.tone}`}><Icon name={item.icon} size={18} /></div><span className="kpi-menu" aria-hidden="true"><Icon name="more" size={18} /></span><div className="kpi-label">{item.label}</div><div className="kpi-value">{item.value}</div><div className="kpi-foot"><span className={`kpi-change ${item.tone}`}>{item.change}</span><span>{item.note}</span></div></article>
 }
@@ -174,7 +266,7 @@ function App() {
   }, [mobileOpen])
   const currentTitle = activePage === 'dashboard' ? 'Dashboard' : modules[activePage].title
 
-  return <div className="app-shell"><Sidebar active={activePage} onNavigate={(page) => { setActivePage(page); setSearch('') }} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} /><div className="main-column"><Header title={currentTitle} onMenu={() => setMobileOpen(true)} search={search} onSearchChange={setSearch} showSearch={activePage !== 'registry'} />{activePage === 'dashboard' ? <Dashboard onNavigate={setActivePage} search={search} /> : activePage === 'registry' ? <ComplaintRegistry search={search} onSearchChange={setSearch} /> : <ModulePage page={activePage} />}</div></div>
+  return <div className="app-shell"><Sidebar active={activePage} onNavigate={(page) => { setActivePage(page); setSearch('') }} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} /><div className="main-column"><Header title={currentTitle} onMenu={() => setMobileOpen(true)} search={search} onSearchChange={setSearch} showSearch={activePage === 'dashboard'} />{activePage === 'dashboard' ? <Dashboard onNavigate={setActivePage} search={search} /> : activePage === 'registry' ? <ComplaintRegistry search={search} onSearchChange={setSearch} /> : activePage === 'institutions' ? <InstitutionDirectory /> : activePage === 'bureaus' ? <BureauDirectory /> : <ModulePage page={activePage} />}</div></div>
 }
 
 export default App
