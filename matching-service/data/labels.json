@@ -1,0 +1,618 @@
+[
+  {
+    "pair_id": "dev-pension-delay-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "near-identical",
+    "rationale": "Both describe the same missing June pension deposit and request follow-up."
+  },
+  {
+    "pair_id": "dev-pension-delay-02",
+    "expected": "related",
+    "language": "English + Hindi",
+    "kind": "cross-language paraphrase",
+    "rationale": "Both report that a pension payment was not deposited."
+  },
+  {
+    "pair_id": "dev-pension-delay-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A missing pension deposit differs from changing the bank account on file."
+  },
+  {
+    "pair_id": "dev-pension-delay-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A missing payment differs from disputing the pension amount calculation."
+  },
+  {
+    "pair_id": "dev-water-connection-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "paraphrase",
+    "rationale": "Both concern a household water connection not installed after application."
+  },
+  {
+    "pair_id": "dev-water-connection-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "spelling and punctuation variation",
+    "rationale": "Both report the same unresolved connection application with informal spelling and punctuation changes."
+  },
+  {
+    "pair_id": "dev-water-connection-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "generic keyword overlap",
+    "rationale": "A delayed new connection differs from an incorrect existing water bill."
+  },
+  {
+    "pair_id": "dev-water-connection-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A connection installation delay differs from a low-pressure supply complaint."
+  },
+  {
+    "pair_id": "dev-road-repair-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "abbreviation and spelling variation",
+    "rationale": "Both report the same pothole hazard on Cedar Road and ask for repair."
+  },
+  {
+    "pair_id": "dev-road-repair-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "paraphrase",
+    "rationale": "Both describe a dangerous pothole at the same junction."
+  },
+  {
+    "pair_id": "dev-road-repair-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "keyword overlap, different issue",
+    "rationale": "A pothole repair request differs from a streetlight outage on the same road."
+  },
+  {
+    "pair_id": "dev-road-repair-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A road surface hazard differs from a parking ticket dispute."
+  },
+  {
+    "pair_id": "dev-kannada-school-route-01",
+    "expected": "related",
+    "language": "Kannada + Romanized Kannada",
+    "kind": "Kannada native and Romanized Kannada",
+    "rationale": "Both say the school bus stop was moved far from the home."
+  },
+  {
+    "pair_id": "dev-kannada-school-route-02",
+    "expected": "related",
+    "language": "Romanized Kannada",
+    "kind": "Romanized Kannada paraphrase",
+    "rationale": "Both describe a changed route making the school bus stop difficult for the child to reach."
+  },
+  {
+    "pair_id": "dev-kannada-school-route-03",
+    "expected": "unrelated",
+    "language": "Kannada + English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A moved bus stop differs from a request to renew a student's bus pass."
+  },
+  {
+    "pair_id": "dev-kannada-school-route-04",
+    "expected": "unrelated",
+    "language": "Romanized Kannada",
+    "kind": "similar topic, separate issue",
+    "rationale": "A route change differs from a bus arriving late at the unchanged stop."
+  },
+  {
+    "pair_id": "dev-electricity-billing-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "near-identical cross-bureau report",
+    "rationale": "Both report two electricity charges for one bill and request reversal."
+  },
+  {
+    "pair_id": "dev-electricity-billing-02",
+    "expected": "related",
+    "language": "English + Romanized Hindi",
+    "kind": "Hinglish and English",
+    "rationale": "Both describe a single bill payment being debited twice."
+  },
+  {
+    "pair_id": "dev-electricity-billing-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "Duplicate payment differs from correcting the customer's name on the bill."
+  },
+  {
+    "pair_id": "dev-electricity-billing-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "negation and outcome contrast",
+    "rationale": "A confirmed duplicate payment differs from a bill that was not charged twice."
+  },
+  {
+    "pair_id": "test-benefit-disbursement-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "paraphrase",
+    "rationale": "Both concern an approved housing benefit that has not been deposited."
+  },
+  {
+    "pair_id": "test-benefit-disbursement-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "cross-institution report",
+    "rationale": "Both report the same delayed benefit installment, submitted to different fictional offices."
+  },
+  {
+    "pair_id": "test-benefit-disbursement-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A missing installment differs from applying for first-time eligibility."
+  },
+  {
+    "pair_id": "test-benefit-disbursement-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A payment delay differs from an address update on a benefit account."
+  },
+  {
+    "pair_id": "test-hindi-pension-admin-01",
+    "expected": "related",
+    "language": "Hindi",
+    "kind": "Hindi paraphrase",
+    "rationale": "Both state that the pension payment is late and absent from the bank account."
+  },
+  {
+    "pair_id": "test-hindi-pension-admin-02",
+    "expected": "related",
+    "language": "English + Romanized Hindi",
+    "kind": "Hinglish paraphrase",
+    "rationale": "Both report a pension payment not credited for the current month."
+  },
+  {
+    "pair_id": "test-hindi-pension-admin-03",
+    "expected": "unrelated",
+    "language": "Hindi",
+    "kind": "similar topic, separate issue",
+    "rationale": "A late deposit differs from requesting a change to the pension bank account."
+  },
+  {
+    "pair_id": "test-hindi-pension-admin-04",
+    "expected": "unrelated",
+    "language": "Hinglish",
+    "kind": "similar topic, separate issue",
+    "rationale": "A missing deposit differs from a complaint that the pension amount is too small."
+  },
+  {
+    "pair_id": "test-water-hindi-meter-01",
+    "expected": "related",
+    "language": "English + Hindi",
+    "kind": "English-Hindi paraphrase",
+    "rationale": "Both report a water meter reading much higher than actual usage."
+  },
+  {
+    "pair_id": "test-water-hindi-meter-02",
+    "expected": "related",
+    "language": "Hindi",
+    "kind": "Hindi spelling variation",
+    "rationale": "Both dispute an unusually high water bill caused by an incorrect reading."
+  },
+  {
+    "pair_id": "test-water-hindi-meter-03",
+    "expected": "unrelated",
+    "language": "Hindi",
+    "kind": "same utility, separate issue",
+    "rationale": "An incorrect meter reading differs from a new connection application delay."
+  },
+  {
+    "pair_id": "test-water-hindi-meter-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "generic keyword overlap",
+    "rationale": "A meter dispute differs from reporting low water pressure at the tap."
+  },
+  {
+    "pair_id": "test-permit-approval-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "English paraphrase",
+    "rationale": "Both ask for a decision on the same building permit application that has not progressed."
+  },
+  {
+    "pair_id": "test-permit-approval-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "cross-bureau report",
+    "rationale": "Both refer to the same permit file and missing approval update across two fictional offices."
+  },
+  {
+    "pair_id": "test-permit-approval-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same application, separate issue",
+    "rationale": "A delayed decision differs from a missing document notice in another permit case."
+  },
+  {
+    "pair_id": "test-permit-approval-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "generic keyword overlap",
+    "rationale": "A permit decision delay differs from an overcharge of the permit application fee."
+  },
+  {
+    "pair_id": "test-kannada-bus-stop-01",
+    "expected": "related",
+    "language": "Kannada + Romanized Kannada",
+    "kind": "Kannada native and Romanized Kannada",
+    "rationale": "Both report that the same school bus stop moved farther away."
+  },
+  {
+    "pair_id": "test-kannada-bus-stop-02",
+    "expected": "related",
+    "language": "Romanized Kannada",
+    "kind": "Romanized Kannada paraphrase",
+    "rationale": "Both say the changed school route has made the walk to the stop unsafe for children."
+  },
+  {
+    "pair_id": "test-kannada-bus-stop-03",
+    "expected": "unrelated",
+    "language": "Kannada + English",
+    "kind": "same topic, separate issue",
+    "rationale": "A moved stop differs from a complaint about the school bus pass fee."
+  },
+  {
+    "pair_id": "test-kannada-bus-stop-04",
+    "expected": "unrelated",
+    "language": "Romanized Kannada",
+    "kind": "opposite outcome",
+    "rationale": "A route that moved away differs from a route that still stops near the home."
+  },
+  {
+    "pair_id": "test-road-kannada-01",
+    "expected": "related",
+    "language": "Kannada + Romanized Kannada",
+    "kind": "Kannada native and Romanized Kannada",
+    "rationale": "Both report a dangerous pothole on the fictional market road."
+  },
+  {
+    "pair_id": "test-road-kannada-02",
+    "expected": "related",
+    "language": "Romanized Kannada",
+    "kind": "Romanized Kannada spelling variation",
+    "rationale": "Both ask for repair of a deep road hole near the bus depot."
+  },
+  {
+    "pair_id": "test-road-kannada-03",
+    "expected": "unrelated",
+    "language": "Kannada",
+    "kind": "keyword overlap, separate issue",
+    "rationale": "A road pothole differs from a broken streetlight on the same route."
+  },
+  {
+    "pair_id": "test-road-kannada-04",
+    "expected": "unrelated",
+    "language": "Romanized Kannada",
+    "kind": "similar topic, separate issue",
+    "rationale": "A road hole differs from a drain blockage after rain."
+  },
+  {
+    "pair_id": "test-library-hours-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "English paraphrase",
+    "rationale": "Both ask to restore the fictional library's Sunday opening hours."
+  },
+  {
+    "pair_id": "test-library-hours-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "abbreviation and punctuation variation",
+    "rationale": "Both concern the same library closing before the posted time."
+  },
+  {
+    "pair_id": "test-library-hours-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same institution, separate issue",
+    "rationale": "Sunday hours differ from a lost-library-card replacement request."
+  },
+  {
+    "pair_id": "test-library-hours-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same institution, separate issue",
+    "rationale": "A closing-time issue differs from a fine charged for a returned book."
+  },
+  {
+    "pair_id": "test-parking-fine-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "paraphrase",
+    "rationale": "Both dispute the same fictional parking fine because the vehicle was not at the cited location."
+  },
+  {
+    "pair_id": "test-parking-fine-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "abbreviation and punctuation variation",
+    "rationale": "Both say a parking citation was issued after the meter had been paid."
+  },
+  {
+    "pair_id": "test-parking-fine-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same topic, separate issue",
+    "rationale": "A disputed fine differs from a request to pay an accepted parking penalty online."
+  },
+  {
+    "pair_id": "test-parking-fine-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same topic, separate issue",
+    "rationale": "A wrong-location citation differs from renewing a resident parking permit."
+  },
+  {
+    "pair_id": "test-clinic-appointment-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "English paraphrase",
+    "rationale": "Both describe a clinic appointment cancelled without notice and ask for rescheduling."
+  },
+  {
+    "pair_id": "test-clinic-appointment-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "cross-bureau report",
+    "rationale": "Both concern the same fictional clinic booking that disappeared from the portal."
+  },
+  {
+    "pair_id": "test-clinic-appointment-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same clinic, separate issue",
+    "rationale": "A cancelled appointment differs from asking the clinic to correct a prescription label."
+  },
+  {
+    "pair_id": "test-clinic-appointment-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same health service, separate issue",
+    "rationale": "A missing booking differs from a request for a copy of laboratory results."
+  },
+  {
+    "pair_id": "test-housing-leak-01",
+    "expected": "related",
+    "language": "English + Hindi",
+    "kind": "English-Hindi paraphrase",
+    "rationale": "Both report a leaking ceiling in the bedroom after rain."
+  },
+  {
+    "pair_id": "test-housing-leak-02",
+    "expected": "related",
+    "language": "English + Romanized Hindi",
+    "kind": "Hinglish paraphrase",
+    "rationale": "Both request repair of the same roof leak causing water inside the room."
+  },
+  {
+    "pair_id": "test-housing-leak-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same housing topic, separate issue",
+    "rationale": "A roof leak differs from a request to correct the tenant's name on the lease."
+  },
+  {
+    "pair_id": "test-housing-leak-04",
+    "expected": "unrelated",
+    "language": "Hindi",
+    "kind": "same housing topic, separate issue",
+    "rationale": "A ceiling leak differs from a complaint that the heating system is not working."
+  },
+  {
+    "pair_id": "test-waste-collection-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "English paraphrase",
+    "rationale": "Both report that scheduled waste collection was missed on the same two pickup days."
+  },
+  {
+    "pair_id": "test-waste-collection-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "negation-safe report",
+    "rationale": "Both say bins were left full because the scheduled pickup did not occur."
+  },
+  {
+    "pair_id": "test-waste-collection-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "opposite outcome",
+    "rationale": "A missed pickup differs from a report that the truck collected bins on schedule."
+  },
+  {
+    "pair_id": "test-waste-collection-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "Missed collection differs from a request for a replacement recycling container."
+  },
+  {
+    "pair_id": "test-school-fee-refund-01",
+    "expected": "related",
+    "language": "Hindi + Romanized Hindi",
+    "kind": "Hindi-Hinglish paraphrase",
+    "rationale": "Both ask for a refund of a school fee paid twice."
+  },
+  {
+    "pair_id": "test-school-fee-refund-02",
+    "expected": "related",
+    "language": "English + Hindi",
+    "kind": "English-Hindi paraphrase",
+    "rationale": "Both report a duplicate tuition payment for the same term."
+  },
+  {
+    "pair_id": "test-school-fee-refund-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same school, separate issue",
+    "rationale": "A duplicate payment differs from applying for a fee waiver before payment."
+  },
+  {
+    "pair_id": "test-school-fee-refund-04",
+    "expected": "unrelated",
+    "language": "Hindi",
+    "kind": "same school, separate issue",
+    "rationale": "A refund for a duplicate charge differs from a request to correct a student's attendance record."
+  },
+  {
+    "pair_id": "test-transit-timetable-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "English paraphrase",
+    "rationale": "Both ask for the same fictional bus route's published timetable to be corrected."
+  },
+  {
+    "pair_id": "test-transit-timetable-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "abbreviation and punctuation variation",
+    "rationale": "Both report that the last evening bus on Route 4 is missing from the schedule."
+  },
+  {
+    "pair_id": "test-transit-timetable-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "opposite outcome",
+    "rationale": "An inaccurate timetable differs from confirming that a service follows its schedule."
+  },
+  {
+    "pair_id": "test-transit-timetable-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same transit system, separate issue",
+    "rationale": "A timetable discrepancy differs from requesting a refund for a lost transit card."
+  },
+  {
+    "pair_id": "test-public-portal-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "English paraphrase",
+    "rationale": "Both describe the fictional permit portal rejecting a valid PDF upload with the same error."
+  },
+  {
+    "pair_id": "test-public-portal-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "abbreviation and punctuation variation",
+    "rationale": "Both report that the same online form loses entered information before submission."
+  },
+  {
+    "pair_id": "test-public-portal-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "generic keyword overlap",
+    "rationale": "A permit upload failure differs from a parking payment page that charges twice."
+  },
+  {
+    "pair_id": "test-public-portal-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "generic keyword overlap",
+    "rationale": "A form data-loss problem differs from a complaint about a service desk response time."
+  },
+  {
+    "pair_id": "test-accessibility-lift-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "English paraphrase",
+    "rationale": "Both report the lift at the fictional civic hall east entrance out of service."
+  },
+  {
+    "pair_id": "test-accessibility-lift-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "abbreviation and spelling variation",
+    "rationale": "Both say the accessible lift is broken and request an alternative entrance notice."
+  },
+  {
+    "pair_id": "test-accessibility-lift-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "same facility, separate issue",
+    "rationale": "A broken lift differs from a request to replace a missing tactile sign."
+  },
+  {
+    "pair_id": "test-accessibility-lift-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A lift outage differs from a complaint that a ramp is too steep at another entrance."
+  },
+  {
+    "pair_id": "test-opposite-outcomes-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "English paraphrase",
+    "rationale": "Both say the same school route stopped serving the fictional Pine Lane stop after a schedule change."
+  },
+  {
+    "pair_id": "test-opposite-outcomes-02",
+    "expected": "related",
+    "language": "English",
+    "kind": "negation and abbreviation",
+    "rationale": "Both report that the last bus no longer serves the stop despite the published schedule."
+  },
+  {
+    "pair_id": "test-opposite-outcomes-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "opposite outcome",
+    "rationale": "A stop that is skipped differs from a report that the bus still stops there as scheduled."
+  },
+  {
+    "pair_id": "test-opposite-outcomes-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A route stop removed from service differs from a request to add a new stop elsewhere."
+  },
+  {
+    "pair_id": "test-office-billing-01",
+    "expected": "related",
+    "language": "English",
+    "kind": "cross-institution duplicate charge",
+    "rationale": "Both report the fictional licensing fee charged twice for one renewal."
+  },
+  {
+    "pair_id": "test-office-billing-02",
+    "expected": "related",
+    "language": "English + Romanized Hindi",
+    "kind": "Hinglish paraphrase",
+    "rationale": "Both say a single license renewal produced duplicate bank debits."
+  },
+  {
+    "pair_id": "test-office-billing-03",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "generic payment overlap",
+    "rationale": "A duplicate renewal payment differs from a renewal application still awaiting review."
+  },
+  {
+    "pair_id": "test-office-billing-04",
+    "expected": "unrelated",
+    "language": "English",
+    "kind": "similar topic, separate issue",
+    "rationale": "A duplicate fee differs from correcting the business address on a license record."
+  }
+]
