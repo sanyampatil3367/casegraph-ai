@@ -67,4 +67,71 @@ matching-service/.venv/bin/python matching-service/evaluate.py --models labse
 
 The tested isolated environment is Python 3.12.14, Sentence Transformers 6.2.0, PyTorch 2.15.0, and Transformers 5.21.0 on Apple Silicon macOS, using CPU inference. The report records whether each model was evaluated from the local cache or skipped, marks scores as freshly recomputed, and includes cached model load time and process peak RSS when measured. `results/latest.json` is regenerated on each run.
 
-The model cache and virtual environment are ignored by Git. This experiment adds no dependencies to the React/Vite project and has no backend, API keys, or external inference calls.
+The model cache and virtual environment are ignored by Git. The evaluation experiment adds no dependencies to the React/Vite project and makes no external inference calls. The separate local inference API is documented below; it has no external service, API keys, or database integration.
+
+## Isolated local inference API
+
+The local semantic API is integrated into the React Matching Engine as an explicit Generate/Refresh action. It accepts complaint IDs and original text, encodes each complaint once, compares distinct pairs, and returns ranked cosine-similarity candidates for human review. If the request fails, the frontend clearly marks its deterministic Jaccard fallback; a valid empty response remains empty. The service does not determine that two complaints are the same incident, and a score is neither a probability nor a confidence.
+
+The service currently selects `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`. It loads the model once on startup from the existing local Hugging Face cache, using local-only resolution and CPU inference. If the model is missing or incomplete, inference is unavailable; **do not respond by enabling automatic model downloads**. `GET /health` remains available and reports `model_ready: false`. The cache must be prepared manually by the owner before serving requests.
+
+The API needs the already-declared `sentence-transformers` runtime dependency plus FastAPI, Pydantic 2, and Uvicorn. The API tests use FastAPI's `TestClient`, which also requires HTTPX; these packages are declared in `requirements.txt`. If any are absent from the Python 3.12 virtual environment, install the API and test dependencies from the repository root:
+
+```sh
+matching-service/.venv/bin/python -m pip install 'fastapi>=0.115,<1.0' 'pydantic>=2.7,<3.0' 'uvicorn>=0.30,<1.0' 'httpx>=0.27,<1.0'
+```
+
+This installs Python packages only; it does not install or download model weights. The existing `requirements.lock.txt` describes the earlier evaluation environment and has not been regenerated for the API because no packages were installed for this milestone.
+
+To check for the model in the configured local cache without downloading it:
+
+```sh
+HF_HOME=matching-service/.cache/huggingface matching-service/.venv/bin/python -c 'from huggingface_hub import snapshot_download; print(snapshot_download("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", local_files_only=True))'
+```
+
+The `local_files_only=True` option is required. A missing snapshot must be handled as unavailable; never retry without that option. For browser use from the Vite app, start the loopback CORS wrapper from the repository root after installing dependencies and verifying the local cache. It allows only `http://localhost:5173` and `http://127.0.0.1:5173`, with GET/POST and the Content-Type header; it does not allow credentials or other origins.
+
+```sh
+matching-service/.venv/bin/python -m uvicorn local_cors_app:app --app-dir matching-service --host 127.0.0.1 --port 8000 --no-access-log
+```
+
+The underlying `api:app` remains available for non-browser local clients. The wrapper adds only the loopback Vite CORS policy and does not proxy requests.
+
+The endpoint accepts 2–40 records, unique non-blank IDs, original text up to 8,000 characters per complaint, and a caller-supplied cosine threshold from -1 to 1. The request body is limited to 2 MiB. At least two complaints are required to form pairs. No complaint text is persisted or logged by the service. The model is held in memory for the process lifetime; CPU latency and memory use depend on the machine and batch. The service endpoint considers up to 780 pairs at the maximum batch size, so this cap is for a local prototype, not a production throughput guarantee.
+
+Example request:
+
+```sh
+curl --fail-with-body http://127.0.0.1:8000/api/v1/matches \
+  -H 'Content-Type: application/json' \
+  -d '{"complaints":[{"id":"demo-1","original_text":"My pension payment has not reached my bank account."},{"id":"demo-2","original_text":"The monthly retirement payment was not deposited into my account."}],"threshold":0.35}'
+```
+
+Example response (scores vary by model/runtime):
+
+```json
+{
+  "model_id": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "score_type": "cosine_similarity",
+  "score_semantics": "Cosine similarity between L2-normalized multilingual sentence embeddings; not a probability or confidence.",
+  "threshold": 0.35,
+  "matches": [
+    {
+      "pair_id": "<stable SHA-256 pair key>",
+      "complaint_a_id": "demo-1",
+      "complaint_b_id": "demo-2",
+      "similarity": 0.81
+    }
+  ]
+}
+```
+
+The numeric response value above is illustrative only. This service has not been validated for real complaint triage, and the current synthetic held-out study is small and not independently language-reviewed. It does not merge cases or trigger downstream actions.
+
+Run isolated inference and API tests with the existing standard-library test module:
+
+```sh
+matching-service/.venv/bin/python -m unittest matching-service.test_inference_service -v
+```
+
+API tests use FastAPI's `TestClient`, a fake encoder, and an injected model loader; they do not load or download model weights. If FastAPI, Starlette, or HTTPX is absent, unittest explicitly reports the API-focused tests as skipped with the missing dependency names. Install the declared API/test requirements before treating API tests as passed. No service/model startup or download is part of the test command.
