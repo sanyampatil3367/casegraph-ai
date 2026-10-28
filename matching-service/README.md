@@ -1,5 +1,7 @@
 # Isolated multilingual matching evaluation
 
+This README is project-owner documentation and includes evaluation details. Do not distribute it to reviewers. The only reviewer-facing files are `data/review_packet.json` and `REVIEW_INSTRUCTIONS.md`.
+
 This Python experiment is separate from the React/Vite application. It compares local Jaccard and IDF lexical baselines with cached MiniLM and LaBSE sentence embeddings. It does not change production matching behavior or the UI.
 
 ## Dataset and split design
@@ -14,21 +16,33 @@ These examples are synthetic, manually assigned judgments and rationales, and ha
 
 ## Independent language review packet
 
-`data/review_packet.json` is a separate reviewer-facing copy of every complaint pair. It preserves pair IDs and scenario groups, includes the original pair texts and language/script category, and leaves two independent reviewer judgments plus final adjudication fields blank. It omits existing labels, label rationales, development/test assignments, scores, predictions, and model names. No expert or native-language review has yet been represented as completed.
+`data/review_packet.json` is the blinded reviewer template for every complaint pair. Pair and scenario IDs are random opaque identifiers; original complaint text is preserved exactly. Each entry contains only one generic blank `judgment` and `rationale`. It has no language/category field, split assignment, label, model score, prediction, or model name. No expert or native-language review has yet been represented as completed.
 
-Reviewers should read `REVIEW_INSTRUCTIONS.md`. Review pairs independently before discussing disagreements, use `uncertain` when meaning cannot be judged reliably, and judge the underlying issue rather than shared topic words. Scenario groups are visible to help reviewers recognize related variants and hard negatives; split assignments remain hidden.
+Reviewers should receive only the blinded template and `REVIEW_INSTRUCTIONS.md`. The project owner creates separate copies and sends one to each reviewer. Each reviewer completes and returns their copy without seeing or discussing the other's answers. Scenario IDs group variants and hard negatives without exposing the canonical group names.
 
-To complete a packet, copy it and edit only the review fields:
+The owner-only reconciliation mapping is `matching-service/private/review_id_mapping.json`. The `private/` directory is gitignored. The owner must keep a private backup and never distribute the mapping with reviewer packets. It is a plain local mapping, not cryptographically secure. The merge utility also reads canonical complaint pairs from `data/complaint_pairs.json` to validate IDs, group relationships, and exact text.
+
+From the repository root, copy the neutral template into separate owner-controlled files before sending them:
 
 ```sh
-cp matching-service/data/review_packet.json matching-service/data/review_packet_completed.json
-# Fill the reviewer and adjudication fields in review_packet_completed.json.
-matching-service/.venv/bin/python matching-service/merge_reviews.py --input matching-service/data/review_packet_completed.json --output matching-service/data/adjudicated_labels.json
+mkdir -p matching-service/private/submissions
+cp matching-service/data/review_packet.json matching-service/private/reviewer_1_packet.json
+cp matching-service/data/review_packet.json matching-service/private/reviewer_2_packet.json
 ```
 
-The existing `matching-service/.venv` must be available; this workflow was tested with its Python 3.12.14 interpreter. Do not substitute the system `python3`.
+Send each reviewer only their separate copy and the instructions. After both completed packets are returned, place them in the private directory and combine them into an owner-only workspace:
 
-The merge script validates that all review fields are complete and valid, then writes `data/adjudicated_labels.json` as a new file. It refuses to overwrite an existing output; use `--output` to choose another path. The original `data/labels.json`, evaluation results, and blank review packet are not modified. This output is a review record, not a replacement evaluator input; uncertain judgments are preserved rather than coerced to related/unrelated.
+```sh
+matching-service/.venv/bin/python matching-service/merge_reviews.py combine --reviewer-1 matching-service/private/submissions/reviewer_1.json --reviewer-2 matching-service/private/submissions/reviewer_2.json --output matching-service/private/adjudication_workspace.json
+```
+
+The existing `matching-service/.venv` must be available; these commands were tested with its Python 3.12.14 interpreter. Do not substitute the system `python3`. The combine step validates both submissions against the private mapping and canonical complaint text, preserves both judgments and rationales, and leaves final adjudication blank. The owner must edit the workspace and enter an explicit final judgment and rationale for every pair; disagreements are never resolved automatically. Then write a separate final adjudicated-label file:
+
+```sh
+matching-service/.venv/bin/python matching-service/merge_reviews.py finalize --input matching-service/private/adjudication_workspace.json --output matching-service/private/adjudicated_labels.json
+```
+
+Both output steps refuse to overwrite existing files. Choose new output paths for another run. Final labels remain in the owner-only private directory; the evaluator continues to read only `data/labels.json`, so adjudicated results are not automatically substituted. Existing labels, complaint text, and baseline results are not modified.
 
 ## Thresholds and baselines
 
